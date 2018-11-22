@@ -1,46 +1,34 @@
 var bot = require('./index').bot;
-var saveorder = require('./menu').saveorder;
+var SQL = require('./index').con;
+// var saveorder = require('./menu').saveorder;
 
 //Счетчик для проверки есть ли товар в корзине
-var count =0;
+// var count =0;
 
 //Хранение итоговой цены
-var totalamount = [];
+var totalamount = 0;
 
-bot.onText(/\🛍 Корзина/,function (msg){
+var basket = async function basketinfo (userId) {
 
-	var userId = msg.from.id;
+	var select_basket = await SQL("SELECT * FROM basket WHERE telegram_id = ?",[userId]);
 
-	for(var i = 0; i < saveorder.length; i++){
-		if (saveorder[i].userid == userId && saveorder[i].status == true) {
+	bot.sendMessage(userId,'Корзина:');
 
-			count++;
+	for (var i = 0; i < select_basket.length; i++){
 
-		} 
-
+		 bot.sendPhoto(userId, select_basket[i].photo, 
+			{
+				caption:'Название виски:'+select_basket[i].name+ '\nКоличество бутылок:'+select_basket[i].amount+" шт.", 
+				reply_markup: JSON.stringify({
+            		inline_keyboard: [
+            		[{text: '❌ Убрать из корзины', callback_data: 'count' }],
+            		]
+            	})
+			}
+		);
 	}
 
-
-	if (count == 0) {
-
-		bot.sendMessage(userId,'Вы еще не выбрали товар!');
-		return;
-	}
-	else {
-
-		bot.sendMessage(userId,'Вы выбрали:');
-
-		for(var i = 0; i < saveorder.length; i++){
-			if (saveorder[i].userid == userId && saveorder[i].status == true) {
-
-				bot.sendMessage(userId, 'Виски:'+saveorder[i].name + ' Кол-во:'+saveorder[i].amount+ ' Сумма:'+saveorder[i].sum);
-
-			} 
-
-		}
+}
 
 
-	}
-
-
-});
+module.exports = basket;
