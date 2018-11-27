@@ -1,8 +1,8 @@
 -- MySQL dump 10.13  Distrib 5.6.24, for Win64 (x86_64)
 --
--- Host: 127.0.0.1    Database: bot
+-- Host: 127.0.0.1    Database: botsql
 -- ------------------------------------------------------
--- Server version	5.5.5-10.1.35-MariaDB
+-- Server version	5.5.5-10.1.34-MariaDB
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
@@ -24,14 +24,10 @@ DROP TABLE IF EXISTS `basket`;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `basket` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
-  `name` varchar(45) DEFAULT NULL,
-  `photo` varchar(255) DEFAULT NULL,
-  `price` varchar(45) DEFAULT NULL,
-  `sum` varchar(45) DEFAULT NULL,
-  `amount` varchar(45) DEFAULT NULL,
-  `telegram_id` varchar(45) DEFAULT NULL,
+  `product_id` int(11) DEFAULT NULL,
+  `telegram_id` int(11) DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=14 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -40,33 +36,8 @@ CREATE TABLE `basket` (
 
 LOCK TABLES `basket` WRITE;
 /*!40000 ALTER TABLE `basket` DISABLE KEYS */;
-INSERT INTO `basket` VALUES (12,'Jack Daniels','https://produktoff.com/static/upload/goods/82/6582_original.jpg','7500','15000','2','330546902'),(13,'Ballantines','https://decanter.ru/image/225837-viski-ballantines-finest-0-5-l-f.jpg','9800','9800','1','330546902');
+INSERT INTO `basket` VALUES (1,1,330546902),(2,1,330546902),(3,2,330546902);
 /*!40000 ALTER TABLE `basket` ENABLE KEYS */;
-UNLOCK TABLES;
-
---
--- Table structure for table `order`
---
-
-DROP TABLE IF EXISTS `order`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `order` (
-  `id` int(11) NOT NULL,
-  `user_id` varchar(45) DEFAULT NULL,
-  `sum` varchar(45) DEFAULT NULL,
-  `name` varchar(45) DEFAULT NULL,
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `order`
---
-
-LOCK TABLES `order` WRITE;
-/*!40000 ALTER TABLE `order` DISABLE KEYS */;
-/*!40000 ALTER TABLE `order` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
@@ -78,13 +49,12 @@ DROP TABLE IF EXISTS `product`;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `product` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
-  `description` varchar(1000) DEFAULT NULL,
-  `price` varchar(200) DEFAULT NULL,
-  `photo` varchar(200) DEFAULT NULL,
-  `name` varchar(45) DEFAULT NULL,
-  `amount` varchar(45) DEFAULT '0',
+  `description` varchar(255) DEFAULT NULL,
+  `price` varchar(255) DEFAULT NULL,
+  `photo` varchar(255) DEFAULT NULL,
+  `name` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -93,35 +63,35 @@ CREATE TABLE `product` (
 
 LOCK TABLES `product` WRITE;
 /*!40000 ALTER TABLE `product` DISABLE KEYS */;
-INSERT INTO `product` VALUES (1,'Напиток янтарного оттенка, обладающий гармоничным вкусом карамели, ванили и дерева, с легким фруктовым ароматом и приятным послевкусием.','7500','https://produktoff.com/static/upload/goods/82/6582_original.jpg','Jack Daniels','0'),(2,'Виски «Баллантайнс Файнест» – первая и самая знаменитая марка купажированного скотча компании Ballentine’s. Рецептура была создана Джорджем Баллантайном в 1910 году. До этого он на протяжении 27 лет отбирал спирты со всех уголков Шотландии. 40 лучших молтов стали основой виски Ballantines Finest. Крепкий алкогольный напиток славится утонченным, мягким ароматом с цветочными и цитрусовыми нотами, сбалансированным вкусом молочного шоколада и красного яблока, сладким ванильным послевкусием.','9800','https://decanter.ru/image/225837-viski-ballantines-finest-0-5-l-f.jpg','Ballantines','0');
+INSERT INTO `product` VALUES (1,'Напиток янтарного оттенка, обладающий гармоничным вкусом карамели, ванили и дерева, с легким фруктовым ароматом и приятным послевкусием.','7250','https://produktoff.com/static/upload/goods/82/6582_original.jpg','Jack Daniels'),(2,'Виски «Баллантайнс Файнест» – первая и самая знаменитая марка купажированного скотча компании Ballentine’s. Рецептура была создана Джорджем Баллантайном в 1910 году. До этого он на протяжении 27 лет отбирал спирты со всех уголков Шотландии. 40 лучших молт','9600','https://decanter.ru/image/225837-viski-ballantines-finest-0-5-l-f.jpg','Ballantines'),(3,'yuyhufisheuifheswuifheufhiushfui','5555','https://decanter.ru/image/225837-viski-ballantines-finest-0-5-l-f.jpg','uighdufigd');
 /*!40000 ALTER TABLE `product` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
--- Table structure for table `user`
+-- Table structure for table `users`
 --
 
-DROP TABLE IF EXISTS `user`;
+DROP TABLE IF EXISTS `users`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `user` (
+CREATE TABLE `users` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
-  `phone` varchar(100) DEFAULT NULL,
-  `name` varchar(100) DEFAULT NULL,
-  `user_id` int(11) NOT NULL,
-  `age` tinyint(1) DEFAULT NULL,
+  `telegram_id` int(11) DEFAULT NULL,
+  `name` varchar(45) DEFAULT NULL,
+  `age` int(11) DEFAULT NULL,
+  `phone` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=20 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Dumping data for table `user`
+-- Dumping data for table `users`
 --
 
-LOCK TABLES `user` WRITE;
-/*!40000 ALTER TABLE `user` DISABLE KEYS */;
-INSERT INTO `user` VALUES (15,'87071575107','Ais',461238130,1),(19,'+77082010814','Радик',330546902,1);
-/*!40000 ALTER TABLE `user` ENABLE KEYS */;
+LOCK TABLES `users` WRITE;
+/*!40000 ALTER TABLE `users` DISABLE KEYS */;
+INSERT INTO `users` VALUES (1,330546902,'Радик',1,'87082010814'),(2,461238130,'Ais',1,'87054263596');
+/*!40000 ALTER TABLE `users` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
@@ -133,4 +103,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2018-11-23  0:38:24
+-- Dump completed on 2018-11-27 14:07:28

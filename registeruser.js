@@ -232,6 +232,8 @@ bot.on('callback_query', async function (msg) {
     var chatId = msg.message.chat.id;
     var messageId = msg.message.message_id;
 
+     bot.deleteMessage(chatId,messageId);
+
     if (msg.message.text == 'Потвердите, что вам есть 21 год') {
 
 

@@ -1,0 +1,12 @@
+use botsql;
+SELECT b.id, count(product_id) as quantity, b.product_id, b.telegram_id, p.name, p.price, sum(p.price) as summa, p.description, p.photo FROM basket b 
+join product p on p.id = b.product_id
+where telegram_id = 330546902 group by product_id;
+
+use botsql;
+SELECT sum(p.price) as summa FROM basket b 
+join product p on p.id = b.product_id
+where telegram_id = 330546902;
+
+use botsql;
+SELECT * FROM product order by description asc limit 0,2 

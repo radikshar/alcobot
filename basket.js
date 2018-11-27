@@ -31,4 +31,13 @@ var basket = async function basketinfo (userId) {
 }
 
 
+bot.onText(/\🛍 Корзина/, function (msg){
+
+	var userId = msg.from.id;
+
+	basket(userId);
+
+});
+
+
 module.exports = basket;

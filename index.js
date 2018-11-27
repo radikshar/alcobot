@@ -67,7 +67,7 @@ require('./start');
 require('./registeruser');
 require('./menu');
 require('./basket');
-
+require('./help');
 
 
 // bot.on('message', async function(msg){
