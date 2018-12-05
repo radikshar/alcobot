@@ -1,18 +1,8 @@
 var bot = require('./index').bot;
 var SQL = require('./index').con;
 
-
-const buttonmenu = {
-	parse_mode: "Markdown",
-	reply_markup: {
-		keyboard: [["🛍 Корзина"]],
-		resize_keyboard: true,
-		one_time_keyboard: true,
-	},
-};
-
 //Для хранение заказов клиента
-var saveorder = [];
+var savemenu = [];
 
 //Для обработки кнопки
 var count = 0;
@@ -30,15 +20,10 @@ bot.onText(/\🥃 Меню/, async function (msg){
 
 	for(var i = 0; i < select_menu.length; i++){
 
-		saveorder.push({
-			name:select_menu[i].name,
-			photo: select_menu[i].photo,
+		savemenu.push({
+			id: select_menu[i].id,
 			count: count,
-			price: select_menu[i].price,
-			status: false,
-			sum: 0,
 			userid: userId,
-			amount: 0
 		});
 
 		await bot.sendPhoto(userId, select_menu[i].photo, 
@@ -55,10 +40,11 @@ bot.onText(/\🥃 Меню/, async function (msg){
 		count++;
 
 	}
+
 });
 
 
 
 module.exports = {
-	saveorder: saveorder
+	savemenu: savemenu
 }

@@ -68,22 +68,7 @@ require('./registeruser');
 require('./menu');
 require('./basket');
 require('./help');
-
-
-// bot.on('message', async function(msg){
-
-
-//     var userId = msg.from.id;
-//     var text = 'match[1]';
-
-//     bot.sendMessage(userId,'good');
-
-//     var select = await con.query ("INSERT INTO driver (idtelegram) VALUES (?)",[userId]);
-   
-//   var update = await con.query("SELECT * FROM driver");
-
-//   console.log(update);
-
-
-// })
-
+require('./acceptbasket');
+require('./order_end');
+require('clear_basket');
+require('back_menu');

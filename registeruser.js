@@ -13,11 +13,11 @@ const buttonmenu = {
 
 
 
-//регистрация сотрудника
+//регистрация клиента
 bot.onText(/\Регистрация/, async function (msg) {
 	var userId = msg.from.id;
 
-	var select_user = await SQL("SELECT * FROM user WHERE user_id = ?",[userId]);
+	var select_user = await SQL("SELECT * FROM users WHERE telegram_id = ?",[userId]);
 
 	select_user = select_user[0];
 
@@ -36,6 +36,7 @@ bot.onText(/\Регистрация/, async function (msg) {
 
 });
 
+//хранение юзеров в массиве
 var saveuser = [];
 
 
@@ -150,7 +151,7 @@ function register(userId) {
                 	phone: phone,
                 	countacc:countaccept,
                 	countdec: countdec,
-                	userid: telegram_id,
+                	telegram_id: telegram_id,
                 	status:false
                 });
 
@@ -177,46 +178,45 @@ function register(userId) {
 //Регистрация юзеров
 async function regsiteruser(userId,buttonstatus){
 
- for (var i = 0; i < saveuser.length; i++) {
-     if (saveuser[i].status == true && saveuser[i].userid == userId) {
-      bot.sendMessage(userId, 'Вы уже потвердили свой возраст!');
-      return;
+   for (var i = 0; i < saveuser.length; i++) {
+       if (saveuser[i].status == true && saveuser[i].telegram_id == userId) {
+          bot.sendMessage(userId, 'Вы уже потвердили свой возраст!');
+          return;
+      }
   }
-}
 
 
-for (var i = 0; i<saveuser.length; i++) {
+  for (var i = 0; i<saveuser.length; i++) {
 
 
     if (buttonstatus == saveuser[i].countdec) {
 
-     saveuser[i].status = true;
+       var insert_user = await SQL("INSERT INTO users (name,phone,age,telegram_id) VALUES (?,?,?,?)",[saveuser[i].name,saveuser[i].phone,false,saveuser[i].telegram_id]);
+
+       await bot.sendMessage(saveuser[i].telegram_id,'Вам нет 21 года');
+
+   }
+
+   else if (buttonstatus == saveuser[i].countacc) {
+
+       saveuser[i].status = true;
+
+       var insert_user = await SQL("INSERT INTO users (name,phone,age,telegram_id) VALUES (?,?,?,?)",[saveuser[i].name,saveuser[i].phone,true,saveuser[i].telegram_id]);
+
+       await bot.sendMessage(saveuser[i].telegram_id,'Теперь можете выбрать товар в меню',buttonmenu);
 
 
-     var insert_user = await SQL("INSERT INTO user (name,phone,age,user_id) VALUES (?,?,?,?)",[saveuser[i].name,saveuser[i].phone,false,saveuser[i].userid]);
-
-     await bot.sendMessage(saveuser[i].userid,'Вам нет 21 года');
-
- }
-
- else if (buttonstatus == saveuser[i].countacc) {
-
-     saveuser[i].status = true;
-
-     var insert_user = await SQL("INSERT INTO user (name,phone,age,user_id) VALUES (?,?,?,?)",[saveuser[i].name,saveuser[i].phone,true,saveuser[i].userid]);
-
-     await bot.sendMessage(saveuser[i].userid,'Теперь можете выбрать товар в меню',buttonmenu);
-
-
- }
+   }
 }
 
 
 }
 
 
-var saveorder = require('./menu').saveorder;
-var basket = require('./basket');
+var savemenu = require('./menu').savemenu;
+var basket = require('./basket').basket;
+var savebasket = require('./basket').savebasket;
+var end_order = require('./order_end').end_order;
 
 
 
@@ -227,15 +227,32 @@ bot.on('callback_query', async function (msg) {
 
     var buttonstatus = msg.data;
 
-    // console.log(msg);
-
     var chatId = msg.message.chat.id;
     var messageId = msg.message.message_id;
 
-     bot.deleteMessage(chatId,messageId);
 
-    if (msg.message.text == 'Потвердите, что вам есть 21 год') {
+    if (buttonstatus == 'yes') {
 
+        var select_phone = await SQL("SELECT phone FROM users WHERE telegram_id = ?",[userId]);
+        select_phone = select_phone[0];
+        // var datatime = new Date();
+
+        var insert_order = await SQL("UPDATE order_user SET phone = ? WHERE telegram_id = ?",[select_phone.phone,userId]);
+
+        end_order(userId);
+
+        return;
+    }
+
+    if (buttonstatus == 'no') {
+
+        bot.sendMessage(userId,'Введите ваш номер');
+        newnumber(userId);
+        return;
+    }
+
+
+     if (msg.message.text == 'Потвердите, что вам есть 21 год') {
 
         regsiteruser(userId, buttonstatus);
         return;
@@ -243,41 +260,90 @@ bot.on('callback_query', async function (msg) {
     } 
 
 
+    if (buttonstatus.indexOf == 'шт.') {
+        return;
+     }
+
+
     if (buttonstatus == 'basket') {
         basket(userId);
         return;
     }
 
-    for(var i = 0; i < saveorder.length; i++){
+    for (var i = 0; i < savebasket.length; i++){
 
 
-        if (saveorder[i].count == buttonstatus && saveorder[i].userid == userId) {
+        if (buttonstatus == savebasket[i].coudel) {
+            
+
+            var delete_basket = await SQL("DELETE FROM basket WHERE telegram_id = ? AND product_id = ?",[userId,savebasket[i].id]);
+
+            bot.deleteMessage(chatId,messageId);
 
 
-            saveorder[i].amount++; 
 
-            saveorder[i].status = true;
+        } else if (buttonstatus == savebasket[i].couup) {
 
-            saveorder[i].sum = Number(saveorder[i].price) + Number(saveorder[i].sum);
+            var insert_basket = await SQL("INSERT INTO basket (product_id,telegram_id) VALUES (?,?)",[savebasket[i].id,userId]);
 
-            var select_basket = await SQL ("SELECT * FROM basket WHERE telegram_id = ? AND name = ?",[userId,saveorder[i].name]);
+            var select_basket = await SQL("SELECT count(product_id) as quantity FROM basket where telegram_id = ? AND product_id = ?",[userId,savebasket[i].id]);
 
             select_basket = select_basket[0];
 
+            var  reply = JSON.stringify({
+                inline_keyboard: [
+                [{text: ' ❌ ', callback_data: savebasket[i].coudel}, {text: '🔽', callback_data: savebasket[i].coudown },{text: select_basket.quantity+' шт.', callback_data: 'шт'},{text: '🔼',callback_data: savebasket[i].couup}],
+                ]
+            })
 
-            if (typeof select_basket == 'undefined') {
-                var insert_base = await SQL("INSERT INTO basket (name,photo,price,sum,amount,telegram_id) VALUES (?,?,?,?,?,?)",
-                [saveorder[i].name,saveorder[i].photo,saveorder[i].price,saveorder[i].sum,saveorder[i].amount,saveorder[i].userid]);
-            } else {
-                var update_basket = await SQL("UPDATE basket SET amount = ?,sum = ?  WHERE telegram_id = ? AND name = ?",
-                    [saveorder[i].amount,saveorder[i].sum,select_basket.telegram_id,select_basket.name]);
+
+            bot.editMessageReplyMarkup(reply, {message_id: messageId, chat_id: chatId});
+
+
+        } else if (buttonstatus == savebasket[i].coudown) {
+
+            var select_count_basket = await SQL("SELECT count(product_id) as quantity FROM basket where telegram_id = ? AND product_id = ?",[userId,savebasket[i].id]);
+
+            select_count_basket = select_count_basket[0];
+
+            if (select_count_basket.quantity == 1) {
+                return;
             }
 
-             
+            var delete_basket_amount = await SQL ("DELETE FROM basket WHERE telegram_id = ? AND product_id = ? LIMIT 1",[userId,savebasket[i].id]);
+
+             var select_basket = await SQL("SELECT count(product_id) as quantity FROM basket where telegram_id = ? AND product_id = ?",[userId,savebasket[i].id]);
+
+            select_basket = select_basket[0];
+
+            var  reply = JSON.stringify({
+                inline_keyboard: [
+                [{text: ' ❌ ', callback_data: savebasket[i].coudel}, {text: '🔽', callback_data: savebasket[i].coudown },{text: select_basket.quantity+' шт.', callback_data: 'шт'},{text: '🔼',callback_data: savebasket[i].couup}],
+                ]
+            })
+
+
+            bot.editMessageReplyMarkup(reply, {message_id: messageId, chat_id: chatId});
+            
+        }
+    }
+
+    for(var i = 0; i < savemenu.length; i++){
+
+
+        if (savemenu[i].count == buttonstatus && savemenu[i].userid == userId) {
+
+
+            var insert_basket = await SQL("INSERT INTO basket (product_id,telegram_id) VALUES (?,?)",[savemenu[i].id,userId]);
+
+
+            var select_basket = await SQL("SELECT count(product_id) as quantity FROM basket where telegram_id = ? AND product_id = ?",[userId,savemenu[i].id]);
+
+            select_basket = select_basket[0];
 
             var  replyMarkup2 = JSON.stringify({
               inline_keyboard: [
-              [{text: '🗑Добавлено в корзину('+saveorder[i].amount+' шт.)', callback_data: saveorder[i].count }],
+              [{text: '🗑Добавлено в корзину('+select_basket.quantity+' шт.)', callback_data: savemenu[i].count }],
               [{text: '🗑Перейти в корзину', callback_data: 'basket'}],
               ]
           })
@@ -293,3 +359,48 @@ bot.on('callback_query', async function (msg) {
 });
 
 
+function newnumber(userId){
+    var telegram_id = userId;
+    var number = '';
+
+    bot.on('message', async function (msg){
+
+
+        if (msg.from.id == telegram_id) {
+
+
+            if (number == '') {
+
+               if (msg.text!= null) {
+                    phone = msg.text;
+                }
+
+                //Проверка, если в номере присувствуют символы
+                if (isNaN(phone)) {
+                    phone = '';
+                    await bot.sendMessage(userId, 'Вы ввели неправильно телефон, введите заново');
+                    return;
+                }
+
+
+                //Проверка длины номера на соответствие
+                if (phone.length <= 10) {
+                    phone = '';
+                    await bot.sendMessage(userId, 'Вы ввели неправильно телефон, введите заново');
+                    return;
+                }
+
+                var update_phone = await SQL("UPDATE users SET phone = ? WHERE telegram_id = ?",[phone,userId]);
+
+                var insert_order = await SQL("UPDATE order_user SET phone = ? WHERE telegram_id = ?",[phone,userId]);
+
+                end_order(userId);
+            }
+
+        }
+
+    })
+}
+
+
+module.exports = buttonmenu;
